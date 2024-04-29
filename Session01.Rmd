@@ -1,6 +1,6 @@
 ---
 title: "Bioinformatics in R. Lab 1: dplyr and ggplot"
-author: "J. Cesar Ignacio Espinoza - Cesar   "
+author: "J. Deseo "
 date: "Week 01: March 18 and 20, 2024"
 output: 
   html_document: 
