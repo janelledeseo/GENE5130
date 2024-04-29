@@ -1,6 +1,6 @@
 ---
 title: "Bioinformatics in R: Statistical Learning very brief intro"
-author: "J. Cesar Ignacio Espinoza - Cesar   "
+author: "J. Deseo "
 date: "Week 07: April 29th and May 1st 2024"
 output: 
   html_document: 
