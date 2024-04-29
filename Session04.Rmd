@@ -1,6 +1,6 @@
 ---
 title: "Bioinformatics in R WGCNA"
-author: "J. Cesar Ignacio Espinoza - Cesar   "
+author: "J. Deseo "
 date: "Week 05: April 15th and 17th 2024"
 output: 
   html_document: 
