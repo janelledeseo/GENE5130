@@ -8,6 +8,8 @@ output:
     theme: cerulean
 ---
 
+## Hi testing
+
 ## Statistical Learning is Machine Learning
 
 After the lecture in class we will be running some simple linear models.
