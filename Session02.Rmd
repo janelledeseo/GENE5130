@@ -1,6 +1,6 @@
 ---
 title: "Bioinformatics in R. Lab 2: DSeq2"
-author: "J. Cesar Ignacio Espinoza - Cesar   "
+author: "J. Deseo "
 date: "Week 02: March 25 and 27, 2024"
 output: 
   html_document: 
