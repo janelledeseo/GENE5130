@@ -8,8 +8,6 @@ output:
     theme: cerulean
 ---
 
-## Hi testing
-
 ## Statistical Learning is Machine Learning
 
 After the lecture in class we will be running some simple linear models.
@@ -27,19 +25,25 @@ Fox, J. and Weisberg, S. (2019) An R Companion to Applied Regression, Third Edit
 ```{r}
 #### Look at the very elitist prestige package
 help("Prestige")
+
 ```
 
 ### First Model 
 
 ```{r}
-ggplot(Prestige, aes(x= education, y = prestige)) + geom_point()
+### Prestige is a built-in dataset
+ggplot(Prestige, aes(x= education, y = prestige)) + geom_point() 
+
 ```
 
+# y = mx + b
 # prestige = b + m * education.
 
 ```{r}
-reg1<-lm(prestige ~ education, data = Prestige)
+### lm = linear model
+reg1 <- lm(prestige ~ education, data = Prestige)
 summary(reg1)
+
 ```
 HINT: You can get the weights of the model (coefficients) by doing this:
 
@@ -48,20 +52,31 @@ slope <- coef(reg1)[2]
 You can add them to your ggplot with another geometry.
 
 ```{r}
+intercept <- coef(reg1)[1]
+slope <- coef(reg1)[2]
+
+ggplot(Prestige, aes(x= education, y = prestige)) + geom_point() + geom_abline(intercept = intercept, slope = slope, color = "blue")
+
+```
+
+```{r}
 ### Look at the example below, we are adding multiple predictors
-reg2<-lm(prestige~education+log(income)+women, data=Prestige)
+reg2 <- lm(prestige~education+log(income)+women, data=Prestige)
 summary(reg2)
+
 ```
 
 ```{r}
-### We can add categorical data.
-reg3<-lm(prestige~education+log(income)+type,data=Prestige)
+### We can add categorical data
+reg3 <- lm(prestige~education+log(income)+type,data=Prestige)
 summary(reg3)
+
 ```
 
 ```{r}
-#reorder categorical data to have a "basal" category 
+### Reorder categorical data to have a "basal" category 
 Prestige$type <- with(Prestige, factor(type, levels = c("bc","wc","prof")))
+
 ```
 
 # Now let's try with Genetic data, upload the dataset from canvas.
@@ -69,18 +84,46 @@ Prestige$type <- with(Prestige, factor(type, levels = c("bc","wc","prof")))
 
 ```{r setup}
     ### Edit this line so your notebook renders properly
-    knitr::opts_knit$set(root.dir = normalizePath("~/Documents/GENE5130")) 
+    knitr::opts_knit$set(root.dir = normalizePath("~/GitHub/GENE5130"))
+
 ```
 
 ```{r}
-data <- read_csv("Cholesterol.csv")
+data <- read.csv("../data/Cholesterol.csv")
+
+###1 = homozygous major allele
+### 2 = heterozygous
+### 3 = homozygous minor allele
+
 ```
 
-Simple excercise, which snps are significantly associated with Cholesterol level in blood?
+Simple exercise, which SNPs are significantly associated with Cholesterol level in blood?
 
 ```{r}
-### Plot the data, 
-
+### Plot the data
+ggplot(data, aes(x = rs6669795, y = CHOL)) + geom_point()
+```
+```{r}
+### Plot the data
+ggplot(data, aes(x = rs7527051, y = CHOL)) + geom_point()
 ```
 
+```{r}
+### Plot the data
+ggplot(data, aes(x = rs12140539, y = CHOL)) + geom_point()
+```
+
+```{r}
+reg4 <- lm(data$CHOL ~ rs6669795, data = data)
+summary(reg4)
+
+### This is not significant
+```
+```{r}
+reg5 <- lm(data$CHOL ~ rs7527051, data = data)
+summary(reg5)
+
+### This is significant, much smaller p-value compared to above
+### This SNP is significantly associated with cholesterol level in blood
+```
 
