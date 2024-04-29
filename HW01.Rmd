@@ -1,0 +1,135 @@
+---
+title: "HW01"
+output: html_document
+date: "2024-04-25"
+---
+
+
+```{r setup}
+### Edit this line so your notebook renders properly
+knitr::opts_knit$set(root.dir = normalizePath("~/KGI Spring 2024/GENE 5130 - Bioinformatics in R/R files")) 
+
+```
+
+```{r}
+### Import the important libraries
+library(WGCNA)
+library(dplyr)
+library(readr)
+library(DESeq2)
+library(ggplot2)
+library(org.Hs.eg.db)
+library(gprofiler2)
+library(clusterProfiler)
+
+```
+
+```{r}
+### Run this chunk to import the counts table and metadata into your environment
+counts <- read.csv('../data/GSE152418RawCounts.csv', header = TRUE, row.names = 1)
+metadata <- read.csv('../data/GSE152418Metadata.csv', header = TRUE, row.names = 1)
+
+```
+
+```{r}
+gene2color <- read.csv('../data/Gene2color-1.csv', header = TRUE)
+p_values <- read.csv('../data/Pvalues-1.csv', header = TRUE)
+correlations <- read.csv('../data/Correlations-1.csv', header = TRUE)
+  
+```
+
+```{r}
+### Subset the data so only the genes that passed the filter are kept
+subset <- goodSamplesGenes(t(counts))
+good_gene_counts <- counts[subset$goodGenes,]
+
+### Filter the data to remove bad samples
+better_gene_counts <- good_gene_counts %>%
+  dplyr::select(-GSM4614993) %>% 
+  dplyr::select(-GSM4614995) %>% 
+  dplyr::select(-GSM4615000)
+
+```
+Run Gene Set Enrichment Analysis / Gene Ontology on a set of genes (color) <- turquoise
+
+```{r}
+turquoise_genes <- gene2color[gene2color$COLOR == "turquoise",]
+
+```
+
+```{r}
+turq_gene_counts <- better_gene_counts[(row.names(better_gene_counts) %in% turquoise_genes$GENEID),]
+
+```
+
+```{r}
+gsm_list <- c('GSM4614993', 'GSM4614995', 'GSM4615000')
+new_metadata <- metadata[!(row.names(metadata) %in% gsm_list),]
+
+temp_rename <- rename
+rename <- dplyr::rename
+
+new_metadata %>% 
+  rename(days_post_symptom_onset = days_post_symptom_onset.ch1) %>%
+  rename(disease_state = disease.state.ch1) %>%
+  rename(gender = gender.ch1) %>%
+  rename(geographical_location = geographical.location.ch1) %>%
+  rename(severity = severity.ch1)
+
+```
+
+```{r}
+### Create a deseq object
+dds <- DESeqDataSetFromMatrix(countData = turq_gene_counts, 
+                              colData = new_metadata,
+                              design = ~ 1)
+```
+
+```{r}
+dds75 <- dds[rowSums(counts(dds)) >= 23]
+
+```
+
+```{r}
+### Run deseq2
+deseq_ob <- DESeq(dds75)
+
+### Save the results to a new object
+res <- results(deseq_ob, alpha = 0.05)
+
+```
+
+```{r}
+### Convert between ENSEMBL ID and symbol (gene names) 
+sigs.df <-  as.data.frame(res)
+sigs.df$symbol <- mapIds(org.Hs.eg.db, keys= rownames(sigs.df), keytype = 'ENSEMBL', colum = "SYMBOL")
+
+```
+
+```{r}
+### Gene Ontology Analysis
+diff.df <- as.data.frame(sigs.df)
+diff.df <- diff.df %>%
+  filter(padj < 0.05, log2FoldChange > 2, baseMean > 100)
+
+genes_to_test <- rownames(diff.df)
+GO_results <- enrichGO(gene = genes_to_test, OrgDb = "org.Hs.eg.db", keyType = 'ENSEMBL', ont = "BP")
+fit <- plot(barplot(GO_results, showCategory=10))
+
+```
+
+```{r}
+go_upreg <- gost(genes_to_test, organism = 'hsapiens', significant = T)
+gostplot(go_upreg, interactive = T)
+
+```
+
+```{r}
+### GSEA Plot
+res <- res[order(-res$stat),]
+gene_list <- res$stat
+names(gene_list) <- rownames(res)
+gse <- gseGO(gene_list, ont = "BP", keyType = "ENSEMBL", OrgDb ="org.Hs.eg.db", eps = 1e-300 )
+gseaplot(gse, geneSetID = "GO:0006119" )
+
+```
